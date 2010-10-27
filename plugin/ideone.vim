@@ -99,7 +99,7 @@ function! s:Ideone(line1, line2, ...)
   let ids = ideone#getLangIds(&ft)
   let id = ''
   if len(ids) == 0
-    let id = "64"
+    let id = "62" " text
   elseif len(ids) == 1
     let id = ids[0]
   else
