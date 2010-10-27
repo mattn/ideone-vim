@@ -1,7 +1,7 @@
 "=============================================================================
 " File: ideone.vim
 " Author: Yasuhiro Matsumoto <mattn.jp@gmail.com>
-" Last Change: 27-Oct-2010.
+" Last Change: 28-Oct-2010.
 " Version: 0.1
 " WebPage: http://github.com/mattn/ideone-vim
 " License: BSD
@@ -122,7 +122,7 @@ function! s:Ideone(line1, line2, ...)
   if len(id) == 0
     return
   endif
-  let content = join(getline(a:line1, a:line2), "\n")."\n"
+  let content = iconv(join(getline(a:line1, a:line2), "\n")."\n", &encoding, "utf-8")
   let res = ideone#createSubmission(s:ideone_user, s:ideone_pass, content, id, '', run, private)
   if has_key(res, "error")
     if res["error"] == "OK"
