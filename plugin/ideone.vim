@@ -63,6 +63,14 @@ if !exists('g:ideone_put_url_to_clipboard_after_post')
   let g:ideone_put_url_to_clipboard_after_post = 1
 endif
 
+if !exists('g:ideone_open_buffer_after_post')
+  let g:ideone_open_buffer_after_post = 0
+endif
+
+if !exists('g:ideone_open_buffer_command')
+  let g:ideone_open_buffer_command = 'botright split'
+endif
+
 let s:ideone_user = ''
 let s:ideone_pass = ''
 
@@ -142,6 +150,10 @@ function! s:Ideone(line1, line2, ...)
         else
           let @+ = url
         endif
+      endif
+      if len(url) > 0 && g:ideone_open_buffer_after_post
+        call ideone#waitRunning(s:ideone_user, s:ideone_pass, res["link"])
+        call ideone#openOutputBuffer(s:ideone_user, s:ideone_pass, res["link"])
       endif
     else
       echoerr res["error"]
