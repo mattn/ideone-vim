@@ -311,6 +311,7 @@ endfunction
 function! ideone#waitRunning(ideone_user, ideone_pass, link)
   let l:status = 1
   while l:status
+    sleep 1
     let l:res = ideone#getSubmissionStatus(a:ideone_user, a:ideone_pass, a:link)
     if res["error"] == "OK"
       let l:status = l:res["status"]
