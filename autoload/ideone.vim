@@ -68,6 +68,17 @@ let s:languages = {
 \ "php": "29",
 \}
 
+let s:results = {
+\ "0": "not running",
+\ "11": "compilation error",
+\ "12": "runtime error",
+\ "13": "time limit exceeded",
+\ "15": "success",
+\ "17": "memory limit exceeded",
+\ "19": "illegal system call",
+\ "20": "internal error",
+\}
+
 function! ideone#testFunction(ideone_user, ideone_pass)
   let envelope = xml#createElement("soap:Envelope")
   let envelope.attr["xmlns:soap"] = "http://schemas.xmlsoap.org/soap/envelope/"
@@ -183,6 +194,101 @@ function! ideone#createSubmission(ideone_user, ideone_pass, sourceCode, language
   return ret
 endfunction
 
+function! ideone#getSubmissionStatus(ideone_user, ideone_pass, link)
+  let envelope = xml#createElement("soap:Envelope")
+  let envelope.attr["xmlns:soap"] = "http://schemas.xmlsoap.org/soap/envelope/"
+  let envelope.attr["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+  let body = xml#createElement("soap:Body")
+
+    call add(envelope.child, body)
+    let getSubmissionStatus = xml#createElement("getSubmissionStatus")
+    call add(body.child, getSubmissionStatus)
+
+    let user = xml#createElement("user")
+    let user.attr["xsi:type"] = "xsd:string"
+    call user.value(a:ideone_user)
+    call add(getSubmissionStatus.child, user)
+
+    let pass = xml#createElement("pass")
+    let pass.attr["xsi:type"] = "xsd:string"
+    call pass.value(a:ideone_pass)
+    call add(getSubmissionStatus.child, pass)
+
+    let link = xml#createElement("link")
+    let link.attr["xsi:type"] = "xsd:string"
+    call link.value(a:link)
+    call add(getSubmissionStatus.child, link)
+
+  let str = '<?xml version="1.0" encoding="UTF-8"?>' . envelope.toString()
+  let res = http#post("http://ideone.com/api/1/service", str)
+  let dom = xml#parse(res.content)
+  let ret = {}
+  for item in dom.findAll("item")
+    let ret[item.find("key").value()] = item.find("value").value()
+  endfor
+  return ret
+endfunction
+
+function! ideone#getSubmissionDetails(ideone_user, ideone_pass, link, withSource, withInput, withOutput, withStderr, withCmpinfo)
+  let envelope = xml#createElement("soap:Envelope")
+  let envelope.attr["xmlns:soap"] = "http://schemas.xmlsoap.org/soap/envelope/"
+  let envelope.attr["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+  let body = xml#createElement("soap:Body")
+
+    call add(envelope.child, body)
+    let getSubmissionDetails = xml#createElement("getSubmissionDetails")
+    call add(body.child, getSubmissionDetails)
+
+    let user = xml#createElement("user")
+    let user.attr["xsi:type"] = "xsd:string"
+    call user.value(a:ideone_user)
+    call add(getSubmissionDetails.child, user)
+
+    let pass = xml#createElement("pass")
+    let pass.attr["xsi:type"] = "xsd:string"
+    call pass.value(a:ideone_pass)
+    call add(getSubmissionDetails.child, pass)
+
+    let link = xml#createElement("link")
+    let link.attr["xsi:type"] = "xsd:string"
+    call link.value(a:link)
+    call add(getSubmissionDetails.child, link)
+
+    let withSource = xml#createElement("withSource")
+    let withSource.attr["xsi:type"] = "xsd:boolean"
+    call withSource.value(a:withSource ? "true" : "false")
+    call add(getSubmissionDetails.child, withSource)
+
+    let withInput = xml#createElement("withInput")
+    let withInput.attr["xsi:type"] = "xsd:boolean"
+    call withInput.value(a:withInput ? "true" : "false")
+    call add(getSubmissionDetails.child, withInput)
+
+    let withOutput = xml#createElement("withOutput")
+    let withOutput.attr["xsi:type"] = "xsd:boolean"
+    call withOutput.value(a:withOutput ? "true" : "false")
+    call add(getSubmissionDetails.child, withOutput)
+
+    let withStderr = xml#createElement("withStderr")
+    let withStderr.attr["xsi:type"] = "xsd:boolean"
+    call withStderr.value(a:withStderr ? "true" : "false")
+    call add(getSubmissionDetails.child, withStderr)
+
+    let withCmpinfo = xml#createElement("withCmpinfo")
+    let withCmpinfo.attr["xsi:type"] = "xsd:boolean"
+    call withCmpinfo.value(a:withCmpinfo ? "true" : "false")
+    call add(getSubmissionDetails.child, withCmpinfo)
+
+  let str = '<?xml version="1.0" encoding="UTF-8"?>' . envelope.toString()
+  let res = http#post("http://ideone.com/api/1/service", str)
+  let dom = xml#parse(res.content)
+  let ret = {}
+  for item in dom.findAll("item")
+    let ret[item.find("key").value()] = item.find("value").value()
+  endfor
+  return ret
+endfunction
+
 function! ideone#getLangIds(name)
   if has_key(s:languages, a:name)
     return [s:languages[a:name]]
@@ -194,6 +300,68 @@ function! ideone#getLangIds(name)
       endif
     endfor
     return c
+  endif
+endfunction
+
+function! ideone#getResultMeaning(value)
+  if has_key(s:results, a:value)
+    return s:results[a:value]
+endfunction
+
+function! ideone#waitRunning(ideone_user, ideone_pass, link)
+  let l:status = 1
+  while l:status
+    sleep 1
+    let l:res = ideone#getSubmissionStatus(a:ideone_user, a:ideone_pass, a:link)
+    if res["error"] == "OK"
+      let l:status = l:res["status"]
+    endif
+  endwhile
+endfunction
+
+function! ideone#openOutputBuffer(ideone_user, ideone_pass, link)
+  let res = ideone#getSubmissionDetails(a:ideone_user, a:ideone_pass, a:link, 0, 1, 1, 1, 1)
+  if has_key(res, "error")
+    if res["error"] == "OK"
+      if !exists('s:bufnr')
+        let s:bufnr = -1
+      endif
+      if !bufexists(s:bufnr)
+        execute g:ideone_open_buffer_command
+        edit `='[ideone output]'`
+        let s:bufnr = bufnr('%')
+      elseif bufwinnr(s:bufnr) != -1
+        execute bufwinnr(s:bufnr) 'wincmd w'
+      else
+        execute g:ideone_open_buffer_command
+        execute 'buffer' s:bufnr
+      endif
+
+      % delete _
+
+      if res['cmpinfo'] != ''
+        call append(line('$'), 'compilation info:')
+        call append(line('$'), split(res['cmpinfo'], '\n'))
+      endif
+
+      call append(line('$'), join([
+            \ 'result:'.ideone#getResultMeaning(res["result"]),
+            \ 'time:'.res["time"],
+            \ 'memory:'.res["memory"],
+            \ 'returned value:'.res["signal"],
+            \ ], "  "))
+
+      call append(line('$'), 'output:')
+      call append(line('$'), split(res['output'], '\n'))
+
+      if res['stderr'] != ''
+        call append(line('$'), 'stderr:')
+        call append(line('$'), split(res['stderr'], '\n'))
+      endif
+
+      1 delete _
+      setlocal nomodified
+    endif
   endif
 endfunction
 
