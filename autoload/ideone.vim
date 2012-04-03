@@ -80,28 +80,28 @@ let s:results = {
 \}
 
 function! ideone#testFunction(ideone_user, ideone_pass)
-  let envelope = xml#createElement("soap:Envelope")
+  let envelope = webapi#xml#createElement("soap:Envelope")
   let envelope.attr["xmlns:soap"] = "http://schemas.xmlsoap.org/soap/envelope/"
   let envelope.attr["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
 
-  let body = xml#createElement("soap:Body")
+  let body = webapi#xml#createElement("soap:Body")
   call add(envelope.child, body)
-  let testFunction = xml#createElement("testFunction")
+  let testFunction = webapi#xml#createElement("testFunction")
   call add(body.child, testFunction)
 
-    let user = xml#createElement("user")
+    let user = webapi#xml#createElement("user")
     let user.attr["xsi:type"] = "xsd:string"
     call user.value(a:ideone_user)
     call add(testFunction.child, user)
 
-    let pass = xml#createElement("pass")
+    let pass = webapi#xml#createElement("pass")
     let pass.attr["xsi:type"] = "xsd:string"
     call pass.value(a:ideone_pass)
     call add(testFunction.child, pass)
 
   let str = '<?xml version="1.0" encoding="UTF-8"?>' . envelope.toString()
-  let res = http#post("http://ideone.com/api/1/service", str)
-  let dom = xml#parse(res.content)
+  let res = webapi#http#post("http://ideone.com/api/1/service", str)
+  let dom = webapi#xml#parse(res.content)
   let ret = {}
   for item in dom.findAll("item")
     let ret[item.find("key").value()] = item.find("value").value()
@@ -110,28 +110,28 @@ function! ideone#testFunction(ideone_user, ideone_pass)
 endfunction
 
 function! ideone#getLanguages(ideone_user, ideone_pass)
-  let envelope = xml#createElement("soap:Envelope")
+  let envelope = webapi#xml#createElement("soap:Envelope")
   let envelope.attr["xmlns:soap"] = "http://schemas.xmlsoap.org/soap/envelope/"
   let envelope.attr["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
 
-  let body = xml#createElement("soap:Body")
+  let body = webapi#xml#createElement("soap:Body")
   call add(envelope.child, body)
-  let getLanguages = xml#createElement("getLanguages")
+  let getLanguages = webapi#xml#createElement("getLanguages")
   call add(body.child, getLanguages)
 
-    let user = xml#createElement("user")
+    let user = webapi#xml#createElement("user")
     let user.attr["xsi:type"] = "xsd:string"
     call user.value(a:ideone_user)
     call add(getLanguages.child, user)
 
-    let pass = xml#createElement("pass")
+    let pass = webapi#xml#createElement("pass")
     let pass.attr["xsi:type"] = "xsd:string"
     call pass.value(a:ideone_pass)
     call add(getLanguages.child, pass)
 
   let str = '<?xml version="1.0" encoding="UTF-8"?>' . envelope.toString()
-  let res = http#post("http://ideone.com/api/1/service", str)
-  let dom = xml#parse(res.content)
+  let res = webapi#http#post("http://ideone.com/api/1/service", str)
+  let dom = webapi#xml#parse(res.content)
   let ret = {}
   for item in dom.findAll("item")
     let ret[item.find("key").value()] = item.find("value").value()
@@ -140,53 +140,53 @@ function! ideone#getLanguages(ideone_user, ideone_pass)
 endfunction
 
 function! ideone#createSubmission(ideone_user, ideone_pass, sourceCode, language, input, run, private)
-  let envelope = xml#createElement("soap:Envelope")
+  let envelope = webapi#xml#createElement("soap:Envelope")
   let envelope.attr["xmlns:soap"] = "http://schemas.xmlsoap.org/soap/envelope/"
   let envelope.attr["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
-  let body = xml#createElement("soap:Body")
+  let body = webapi#xml#createElement("soap:Body")
 
     call add(envelope.child, body)
-    let createSubmission = xml#createElement("createSubmission")
+    let createSubmission = webapi#xml#createElement("createSubmission")
     call add(body.child, createSubmission)
 
-    let user = xml#createElement("user")
+    let user = webapi#xml#createElement("user")
     let user.attr["xsi:type"] = "xsd:string"
     call user.value(a:ideone_user)
     call add(createSubmission.child, user)
 
-    let pass = xml#createElement("pass")
+    let pass = webapi#xml#createElement("pass")
     let pass.attr["xsi:type"] = "xsd:string"
     call pass.value(a:ideone_pass)
     call add(createSubmission.child, pass)
 
-    let sourceCode = xml#createElement("sourceCode")
+    let sourceCode = webapi#xml#createElement("sourceCode")
     let sourceCode.attr["xsi:type"] = "xsd:string"
     call sourceCode.value(a:sourceCode)
     call add(createSubmission.child, sourceCode)
 
-    let language = xml#createElement("language")
+    let language = webapi#xml#createElement("language")
     let language.attr["xsi:type"] = "xsd:integer"
     call language.value(a:language)
     call add(createSubmission.child, language)
 
-    let inpu = xml#createElement("input")
+    let inpu = webapi#xml#createElement("input")
     let inpu.attr["xsi:type"] = "xsd:string"
     call inpu.value(a:input)
     call add(createSubmission.child, inpu)
 
-    let run = xml#createElement("run")
+    let run = webapi#xml#createElement("run")
     let run.attr["xsi:type"] = "xsd:boolean"
     call run.value(a:run ? "true" : "false")
     call add(createSubmission.child, run)
 
-    let private = xml#createElement("private")
+    let private = webapi#xml#createElement("private")
     let private.attr["xsi:type"] = "xsd:boolean"
     call private.value(a:private ? "true" : "false")
     call add(createSubmission.child, private)
 
   let str = '<?xml version="1.0" encoding="UTF-8"?>' . envelope.toString()
-  let res = http#post("http://ideone.com/api/1/service", str)
-  let dom = xml#parse(res.content)
+  let res = webapi#http#post("http://ideone.com/api/1/service", str)
+  let dom = webapi#xml#parse(res.content)
   let ret = {}
   for item in dom.findAll("item")
     let ret[item.find("key").value()] = item.find("value").value()
@@ -195,33 +195,33 @@ function! ideone#createSubmission(ideone_user, ideone_pass, sourceCode, language
 endfunction
 
 function! ideone#getSubmissionStatus(ideone_user, ideone_pass, link)
-  let envelope = xml#createElement("soap:Envelope")
+  let envelope = webapi#xml#createElement("soap:Envelope")
   let envelope.attr["xmlns:soap"] = "http://schemas.xmlsoap.org/soap/envelope/"
   let envelope.attr["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
-  let body = xml#createElement("soap:Body")
+  let body = webapi#xml#createElement("soap:Body")
 
     call add(envelope.child, body)
-    let getSubmissionStatus = xml#createElement("getSubmissionStatus")
+    let getSubmissionStatus = webapi#xml#createElement("getSubmissionStatus")
     call add(body.child, getSubmissionStatus)
 
-    let user = xml#createElement("user")
+    let user = webapi#xml#createElement("user")
     let user.attr["xsi:type"] = "xsd:string"
     call user.value(a:ideone_user)
     call add(getSubmissionStatus.child, user)
 
-    let pass = xml#createElement("pass")
+    let pass = webapi#xml#createElement("pass")
     let pass.attr["xsi:type"] = "xsd:string"
     call pass.value(a:ideone_pass)
     call add(getSubmissionStatus.child, pass)
 
-    let link = xml#createElement("link")
+    let link = webapi#xml#createElement("link")
     let link.attr["xsi:type"] = "xsd:string"
     call link.value(a:link)
     call add(getSubmissionStatus.child, link)
 
   let str = '<?xml version="1.0" encoding="UTF-8"?>' . envelope.toString()
-  let res = http#post("http://ideone.com/api/1/service", str)
-  let dom = xml#parse(res.content)
+  let res = webapi#http#post("http://ideone.com/api/1/service", str)
+  let dom = webapi#xml#parse(res.content)
   let ret = {}
   for item in dom.findAll("item")
     let ret[item.find("key").value()] = item.find("value").value()
@@ -230,58 +230,58 @@ function! ideone#getSubmissionStatus(ideone_user, ideone_pass, link)
 endfunction
 
 function! ideone#getSubmissionDetails(ideone_user, ideone_pass, link, withSource, withInput, withOutput, withStderr, withCmpinfo)
-  let envelope = xml#createElement("soap:Envelope")
+  let envelope = webapi#xml#createElement("soap:Envelope")
   let envelope.attr["xmlns:soap"] = "http://schemas.xmlsoap.org/soap/envelope/"
   let envelope.attr["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
-  let body = xml#createElement("soap:Body")
+  let body = webapi#xml#createElement("soap:Body")
 
     call add(envelope.child, body)
-    let getSubmissionDetails = xml#createElement("getSubmissionDetails")
+    let getSubmissionDetails = webapi#xml#createElement("getSubmissionDetails")
     call add(body.child, getSubmissionDetails)
 
-    let user = xml#createElement("user")
+    let user = webapi#xml#createElement("user")
     let user.attr["xsi:type"] = "xsd:string"
     call user.value(a:ideone_user)
     call add(getSubmissionDetails.child, user)
 
-    let pass = xml#createElement("pass")
+    let pass = webapi#xml#createElement("pass")
     let pass.attr["xsi:type"] = "xsd:string"
     call pass.value(a:ideone_pass)
     call add(getSubmissionDetails.child, pass)
 
-    let link = xml#createElement("link")
+    let link = webapi#xml#createElement("link")
     let link.attr["xsi:type"] = "xsd:string"
     call link.value(a:link)
     call add(getSubmissionDetails.child, link)
 
-    let withSource = xml#createElement("withSource")
+    let withSource = webapi#xml#createElement("withSource")
     let withSource.attr["xsi:type"] = "xsd:boolean"
     call withSource.value(a:withSource ? "true" : "false")
     call add(getSubmissionDetails.child, withSource)
 
-    let withInput = xml#createElement("withInput")
+    let withInput = webapi#xml#createElement("withInput")
     let withInput.attr["xsi:type"] = "xsd:boolean"
     call withInput.value(a:withInput ? "true" : "false")
     call add(getSubmissionDetails.child, withInput)
 
-    let withOutput = xml#createElement("withOutput")
+    let withOutput = webapi#xml#createElement("withOutput")
     let withOutput.attr["xsi:type"] = "xsd:boolean"
     call withOutput.value(a:withOutput ? "true" : "false")
     call add(getSubmissionDetails.child, withOutput)
 
-    let withStderr = xml#createElement("withStderr")
+    let withStderr = webapi#xml#createElement("withStderr")
     let withStderr.attr["xsi:type"] = "xsd:boolean"
     call withStderr.value(a:withStderr ? "true" : "false")
     call add(getSubmissionDetails.child, withStderr)
 
-    let withCmpinfo = xml#createElement("withCmpinfo")
+    let withCmpinfo = webapi#xml#createElement("withCmpinfo")
     let withCmpinfo.attr["xsi:type"] = "xsd:boolean"
     call withCmpinfo.value(a:withCmpinfo ? "true" : "false")
     call add(getSubmissionDetails.child, withCmpinfo)
 
   let str = '<?xml version="1.0" encoding="UTF-8"?>' . envelope.toString()
-  let res = http#post("http://ideone.com/api/1/service", str)
-  let dom = xml#parse(res.content)
+  let res = webapi#http#post("http://ideone.com/api/1/service", str)
+  let dom = webapi#xml#parse(res.content)
   let ret = {}
   for item in dom.findAll("item")
     let ret[item.find("key").value()] = item.find("value").value()
