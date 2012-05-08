@@ -2,7 +2,7 @@
 " File: ideone.vim
 " Author: Yasuhiro Matsumoto <mattn.jp@gmail.com>
 " Last Change: 08-May-2012.
-" Version: 0.1
+" Version: 0.02
 " WebPage: http://github.com/mattn/ideone-vim
 " License: BSD
 " Usage:
