@@ -19,6 +19,9 @@
 "   :Ideone -r
 "     post whole text to ideone with run.
 "
+"   :Ideone -a
+"     always ask your username and password for ideone.
+"
 " Tips:
 "   * if you want to open browser after the post...
 "
@@ -83,6 +86,9 @@ function! s:Ideone(line1, line2, ...)
       let run = 1
     elseif arg == "-p" || arg == "--private"
       let private = 1
+    elseif arg == "-a" || arg == "--auth"
+      let s:ideone_user = ''
+      let s:ideone_pass = ''
     elseif len(arg) > 0
       echoerr 'Invalid arguments'
       unlet args
