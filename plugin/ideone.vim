@@ -1,7 +1,7 @@
 "=============================================================================
 " File: ideone.vim
 " Author: Yasuhiro Matsumoto <mattn.jp@gmail.com>
-" Last Change: 08-May-2012.
+" Last Change: 21-May-2012.
 " Version: 0.02
 " WebPage: http://github.com/mattn/ideone-vim
 " License: BSD
@@ -89,16 +89,18 @@ function! s:Ideone(line1, line2, ...)
       return
     endif
   endfor
-  if len(s:ideone_user) == 0
-    let s:ideone_user = input('Username:')
-    if len(s:ideone_user) == 0
+  let user = s:ideone_user
+  if len(user) == 0
+    let user = input('Username:')
+    if len(user) == 0
       echo 'Canceled'
       return
     endif
   endif
-  if len(s:ideone_pass) == 0
-    let s:ideone_pass = inputsecret('Password:')
-    if len(s:ideone_pass) == 0
+  let pass = s:ideone_pass
+  if len(pass) == 0
+    let pass = inputsecret('Password:')
+    if len(pass) == 0
       echo 'Canceled'
       return
     endif
@@ -132,7 +134,7 @@ function! s:Ideone(line1, line2, ...)
     return
   endif
   let content = iconv(join(getline(a:line1, a:line2), "\n")."\n", &encoding, "utf-8")
-  let res = ideone#createSubmission(s:ideone_user, s:ideone_pass, content, id, '', run, private)
+  let res = ideone#createSubmission(user, pass, content, id, '', run, private)
   if has_key(res, "error")
     if res["error"] == "OK"
       let url = "http://ideone.com/".res["link"]
@@ -153,9 +155,11 @@ function! s:Ideone(line1, line2, ...)
         endif
       endif
       if len(url) > 0 && g:ideone_open_buffer_after_post
-        call ideone#waitRunning(s:ideone_user, s:ideone_pass, res["link"])
-        call ideone#openOutputBuffer(s:ideone_user, s:ideone_pass, res["link"])
+        call ideone#waitRunning(user, pass, res["link"])
+        call ideone#openOutputBuffer(user, pass, res["link"])
       endif
+      let s:ideone_user = user
+      let s:ideone_pass = pass
     else
       echohl ErrorMsg | echo res["error"] | echohl None
     endif
