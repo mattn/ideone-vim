@@ -76,7 +76,7 @@ let s:ideone_pass = ''
 
 function! s:Ideone(line1, line2, ...)
   let args = (a:0 > 0) ? split(a:1, '\s\+') : []
-  let run = 1
+  let run = get(g:, 'ideone_run_default', 0)
   let private = 0
   for arg in args
     if arg == "-r" || arg == "--run"
